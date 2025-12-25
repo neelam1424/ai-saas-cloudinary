@@ -39,6 +39,7 @@ export default clerkMiddleware(async(auth,req)=>{
 
         }
     }
+    return NextResponse.next()
 
 })
 
