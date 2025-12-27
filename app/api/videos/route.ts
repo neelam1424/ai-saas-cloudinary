@@ -17,7 +17,6 @@
 //   }
 // }
 
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -53,6 +52,9 @@ export async function GET() {
     //   );
     // }
 
-    return NextResponse.json({ error: "Error fetching videos" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error fetching videos" },
+      { status: 500 }
+    );
   }
 }

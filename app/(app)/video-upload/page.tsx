@@ -3,19 +3,16 @@
 // import axios from 'axios'
 // import { useRouter } from 'next/navigation'
 
-
 // function VideoUpload() {
 
 //   const [file, setFile] = useState<File | null>(null)
-//   const [title, setTitle] = useState('')
+//   const [title, setTitle] = useState('')ß
 //   const [description, setDescription] = useState('')
 //   const [isUploading, setIsUploading] = useState(false)
-
 
 //   const router = useRouter()
 //   //max file size of 70MB
 //   const MAX_FILE_SIZE = 70 * 1024 * 1024
-
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault()
@@ -33,10 +30,9 @@
 //     formData.append('title', title)
 //     formData.append('description', description)
 //     formData.append("originalSize", file.size.toString())
-    
 
 //     try{
-//       const response=await axios.post('/api/video-upload', formData) 
+//       const response=await axios.post('/api/video-upload', formData)
 //       //check for 200 response
 //       if(response.status===200){
 //         router.push('/')
@@ -44,7 +40,7 @@
 //         //todo add notification system
 //         alert('Upload failed. Please try again.')
 //       }
-          
+
 //     }catch(error){
 //       console.log('Upload error:',error)
 
@@ -52,11 +48,7 @@
 //       setIsUploading(false)
 //     }
 
-
 //   }
-
-
-
 
 //   return (
 //     <div className='container mx-auto p-4'>
@@ -66,20 +58,20 @@
 //           <label className='label'>
 //             <span className='label-text'>Title</span>
 //           </label>
-//           <input 
+//           <input
 //           type="text"
 //           value={title}
 //           onChange={(e) => setTitle(e.target.value)}
 //           className='input input-bordered w-full'
 //           required
 //           />
-           
+
 //         </div>
 //         <div>
 //           <label className='label'>
 //             <span className='label-text'>Description</span>
 //           </label>
-//           <textarea 
+//           <textarea
 //           value={description}
 //           onChange={(e) => setDescription(e.target.value)}
 //           className='textarea textarea-bordered w-full'
@@ -106,9 +98,6 @@
 // }
 
 // export default VideoUpload
-
-
-
 
 "use client";
 import React, { useState } from "react";

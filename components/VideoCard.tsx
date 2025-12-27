@@ -1,113 +1,95 @@
-import React,{useState, useEffect, useCallback, use} from 'react'
-import { getCldImageUrl, getCldVideoUrl } from 'next-cloudinary'
-import {Download, Clock,FileDown, FileUp } from "lucide-react"
-import dayjs from 'dayjs'
-import relativeTime from "dayjs/plugin/relativeTime"
-import {filesize} from "filesize"
-import { Video } from '@prisma/client'
-import { format } from 'path'
+import React, { useState, useEffect, useCallback, use } from "react";
+import { getCldImageUrl, getCldVideoUrl } from "next-cloudinary";
+import { Download, Clock, FileDown, FileUp } from "lucide-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { filesize } from "filesize";
+import { Video } from "@prisma/client";
+import { format } from "path";
 
+dayjs.extend(relativeTime);
 
-dayjs.extend(relativeTime)
-
-interface VideoCardProps{
-    video: Video;
-    onDownload:(url:string,title:string)=> void;
-
+interface VideoCardProps {
+  video: Video;
+  onDownload: (url: string, title: string) => void;
 }
 
-const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
+const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
 
-    const [isHovered, setIsHovered] = useState(false);
-    const [previewError, setPreviewError] = useState(false);
+  const getThumbnailUrl = useCallback((publicId: string) => {
+    return getCldImageUrl({
+      src: publicId,
+      width: 400,
+      height: 225,
+      crop: "fill",
+      gravity: "auto",
+      format: "jpg",
+      quality: "auto",
+      assetType: "video",
+    });
+  }, []);
 
-    const getThumbnailUrl = useCallback((publicId:string) => {
-        return getCldImageUrl({
-            src: publicId,
-            width: 400,
-            height: 225,
-            crop:"fill",
-            gravity:"auto",
-            format: "jpg",
-            quality: "auto",
-            assetType: "video"
+  const getFullVideoUrl = useCallback((publicId: string) => {
+    return getCldVideoUrl({
+      src: publicId,
+      width: 1920,
+      height: 1080,
+    });
+  }, []);
 
+  const getPreviewVideoUrl = useCallback((publicId: string) => {
+    return getCldVideoUrl({
+      src: publicId,
+      width: 400,
+      height: 225,
+      rawTransformations: ["e_preview:duration_15:max_seg_9:min_seg_dur_1"],
+    });
+  }, []);
 
-        });
-    },[]);
+  // const formatFileSize = useCallback((size:number) => {
+  //     return filesize(size);
+  // },[]);
 
-
-
-    const getFullVideoUrl = useCallback((publicId:string) => {
-        return getCldVideoUrl({
-            src: publicId,
-            width: 1920,
-            height: 1080,
-        
-        });
-    },[]);
-
-      const getPreviewVideoUrl = useCallback((publicId:string) => {
-        return getCldVideoUrl({
-            src: publicId,
-            width: 400,
-            height: 225,
-            rawTransformations:["e_preview:duration_15:max_seg_9:min_seg_dur_1" ]
-        
-        });
-    },[]);
-
-
-    // const formatFileSize = useCallback((size:number) => {
-    //     return filesize(size);
-    // },[]);
-
-    const formatFileSize = useCallback((size: number | null | undefined) => {
-  if (typeof size !== "number" || !Number.isFinite(size)) {
-    return "—";
-  }
-  return filesize(size);
-}, []);
-
-
-
-
-
-    const formatDuration = useCallback((seconds:number) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`; 
-    },[]);
-
-    // const compressionPercentage = Math.round(
-    //     (1- Number(video.compresedSize) / Number(video.originalSize)) * 100
-    // );
-
-    const compressionPercentage =
-  video.originalSize > 0 && video.compresedSize > 0
-    ? Math.round((1 - video.compresedSize / video.originalSize) * 100)
-    : null;
-
-
-    useEffect(() => {
-        setPreviewError(false);
-    }, [isHovered]);
-    
-    const handlePreviewError = ()=>{
-        setPreviewError(true);
+  const formatFileSize = useCallback((size: number | null | undefined) => {
+    if (typeof size !== "number" || !Number.isFinite(size)) {
+      return "—";
     }
+    return filesize(size);
+  }, []);
 
+  const formatDuration = useCallback((seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }, []);
 
+  // const compressionPercentage = Math.round(
+  //     (1- Number(video.compresedSize) / Number(video.originalSize)) * 100
+  // );
 
+  const compressionPercentage =
+    video.originalSize > 0 && video.compresedSize > 0
+      ? Math.round((1 - video.compresedSize / video.originalSize) * 100)
+      : null;
 
+  useEffect(() => {
+    setPreviewError(false);
+  }, [isHovered]);
+
+  const handlePreviewError = () => {
+    setPreviewError(true);
+  };
 
   return (
-    <div className='card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300'
-    onMouseEnter={()=>setIsHovered(true)}
-    onMouseLeave={()=>setIsHovered(false)}
+    <div
+      className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-        <figure className='aspect-video relative'>
-            {/* {isHovered ? (
+      <figure className="aspect-video relative">
+        {/* {isHovered ? (
                 previewError ? (
                     <div className='w-full h-full flex items-center justify-center bg-gray-200'>
                         <p className='text-gray-500'>Preview not available</p>
@@ -132,93 +114,81 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
         )} */}
 
         {isHovered && !previewError ? (
-  <video
-    src={getPreviewVideoUrl(video.publicId)}
-    autoPlay
-    muted
-    loop
-    onError={() => setPreviewError(true)}
-  />
-) : (
-  <img src={getThumbnailUrl(video.publicId)} />
-)}
+          <video
+            src={getPreviewVideoUrl(video.publicId)}
+            autoPlay
+            muted
+            loop
+            onError={() => setPreviewError(true)}
+          />
+        ) : (
+          <img src={getThumbnailUrl(video.publicId)} />
+        )}
 
-
-
-        <div className='absolute bottom-2 right-2 bg-base-100 bg-opacity-70 px-2 py-1 rounded-lg text-sm flex items-center'>
-            <Clock size={16} className='mr-1'/>
-            {(formatDuration(Number(video.duration)))}
+        <div className="absolute bottom-2 right-2 bg-base-100 bg-opacity-70 px-2 py-1 rounded-lg text-sm flex items-center">
+          <Clock size={16} className="mr-1" />
+          {formatDuration(Number(video.duration))}
         </div>
-        </figure>
+      </figure>
 
-        <div className='card-body -4'>
-            <h2 className='card-title text-lg font-bold'>{video.title}</h2>
-            <p className='text-sm text-base-content opacity-70 mb-4'>{video.description}</p>
-            <p>Uploaded {dayjs(video.createdAt).fromNow()}</p>
-            <div className='grid grid-cols-2 gap-4 text-sm'>
-                <div className='flex items-center'>
-                    <FileUp size={18} className='mr-2 text-primary'/>
-                    <div>
-                        <div className='font-semibold'>Original</div>
-                        {/* <div>{formatFileSize(Number(video.originalSize))}</div> */}
-                        <div>{formatFileSize(video.originalSize)}</div>
-                    </div>
-                </div>
+      <div className="card-body -4">
+        <h2 className="card-title text-lg font-bold">{video.title}</h2>
+        <p className="text-sm text-base-content opacity-70 mb-4">
+          {video.description}
+        </p>
+        <p>Uploaded {dayjs(video.createdAt).fromNow()}</p>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="flex items-center">
+            <FileUp size={18} className="mr-2 text-primary" />
+            <div>
+              <div className="font-semibold">Original</div>
+              {/* <div>{formatFileSize(Number(video.originalSize))}</div> */}
+              <div>{formatFileSize(video.originalSize)}</div>
+            </div>
+          </div>
 
-                <div className='flex items-center'>
-                    <FileDown size={18} className='mr-2 text-secondary'/>
-                    <div>
-                        <div className='font-semibold'>Compressed</div>
-                        {/* <div>{formatFileSize(Number(video.compresedSize))}</div> */}
+          <div className="flex items-center">
+            <FileDown size={18} className="mr-2 text-secondary" />
+            <div>
+              <div className="font-semibold">Compressed</div>
+              {/* <div>{formatFileSize(Number(video.compresedSize))}</div> */}
 
+              {/* <div>{formatFileSize(video.compresedSize)}</div> */}
 
-
-
-                        {/* <div>{formatFileSize(video.compresedSize)}</div> */}
-
-                     <div>
-                        {video.compresedSize
-                            ? formatFileSize(video.compresedSize)
-                            : "Processing…"}
-                        </div>
-
-
-
-                    
-                    </div>
-                </div>
-                <div className='flex justify-between items-center mt-4'>
-                    {/* <div className='text-sm font-semibold'>Compression:{""}
+              <div>
+                {video.compresedSize
+                  ? formatFileSize(video.compresedSize)
+                  : "Processing…"}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-4">
+            {/* <div className='text-sm font-semibold'>Compression:{""}
                         <span className='text-accent'>{compressionPercentage}%</span>
                     </div> */}
 
-
-
-
-
-                    <div className="text-sm font-semibold">
-                    Compression:
-                    <span className="text-accent">
-                        {compressionPercentage !== null ? `${compressionPercentage}%` : " Processing…"}
-                    </span>
-                    </div>
-
-
-                    <button 
-                    className='btn btn-primary btn-sm'
-                    onClick={()=>
-                        onDownload(getFullVideoUrl(video.publicId), video.title)
-                    }
-                    >
-                        <Download size={16} />
-
-                    </button>
-                </div>
+            <div className="text-sm font-semibold">
+              Compression:
+              <span className="text-accent">
+                {compressionPercentage !== null
+                  ? `${compressionPercentage}%`
+                  : " Processing…"}
+              </span>
             </div>
+
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() =>
+                onDownload(getFullVideoUrl(video.publicId), video.title)
+              }
+            >
+              <Download size={16} />
+            </button>
+          </div>
         </div>
-
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default VideoCard
+export default VideoCard;
