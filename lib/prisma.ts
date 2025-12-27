@@ -36,6 +36,7 @@
 
 import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+// import {prisma} from "@/lib/prisma"
 
 const connectionString = process.env.DATABASE_URL!;
 
