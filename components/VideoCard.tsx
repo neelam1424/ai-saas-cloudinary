@@ -58,9 +58,19 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
     },[]);
 
 
-    const formatFileSize = useCallback((size:number) => {
-        return filesize(size);
-    },[]);
+    // const formatFileSize = useCallback((size:number) => {
+    //     return filesize(size);
+    // },[]);
+
+    const formatFileSize = useCallback((size: number | null | undefined) => {
+  if (typeof size !== "number" || !Number.isFinite(size)) {
+    return "—";
+  }
+  return filesize(size);
+}, []);
+
+
+
 
 
     const formatDuration = useCallback((seconds:number) => {
@@ -69,9 +79,15 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`; 
     },[]);
 
-    const compressionPercentage = Math.round(
-        (1- Number(video.compresedSize) / Number(video.originalSize)) * 100
-    );
+    // const compressionPercentage = Math.round(
+    //     (1- Number(video.compresedSize) / Number(video.originalSize)) * 100
+    // );
+
+    const compressionPercentage =
+  video.originalSize > 0 && video.compresedSize > 0
+    ? Math.round((1 - video.compresedSize / video.originalSize) * 100)
+    : null;
+
 
     useEffect(() => {
         setPreviewError(false);
@@ -91,7 +107,7 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
     onMouseLeave={()=>setIsHovered(false)}
     >
         <figure className='aspect-video relative'>
-            {isHovered ? (
+            {/* {isHovered ? (
                 previewError ? (
                     <div className='w-full h-full flex items-center justify-center bg-gray-200'>
                         <p className='text-gray-500'>Preview not available</p>
@@ -113,7 +129,22 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
             alt={video.title}
             className='w-full h-full object-cover'
             />
-        )}
+        )} */}
+
+        {isHovered && !previewError ? (
+  <video
+    src={getPreviewVideoUrl(video.publicId)}
+    autoPlay
+    muted
+    loop
+    onError={() => setPreviewError(true)}
+  />
+) : (
+  <img src={getThumbnailUrl(video.publicId)} />
+)}
+
+
+
         <div className='absolute bottom-2 right-2 bg-base-100 bg-opacity-70 px-2 py-1 rounded-lg text-sm flex items-center'>
             <Clock size={16} className='mr-1'/>
             {(formatDuration(Number(video.duration)))}
@@ -129,7 +160,8 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
                     <FileUp size={18} className='mr-2 text-primary'/>
                     <div>
                         <div className='font-semibold'>Original</div>
-                        <div>{formatFileSize(Number(video.originalSize))}</div>
+                        {/* <div>{formatFileSize(Number(video.originalSize))}</div> */}
+                        <div>{formatFileSize(video.originalSize)}</div>
                     </div>
                 </div>
 
@@ -137,13 +169,41 @@ const VideoCard: React.FC<VideoCardProps>=({video,onDownload}) => {
                     <FileDown size={18} className='mr-2 text-secondary'/>
                     <div>
                         <div className='font-semibold'>Compressed</div>
-                        <div>{formatFileSize(Number(video.compresedSize))}</div>
+                        {/* <div>{formatFileSize(Number(video.compresedSize))}</div> */}
+
+
+
+
+                        {/* <div>{formatFileSize(video.compresedSize)}</div> */}
+
+                     <div>
+                        {video.compresedSize
+                            ? formatFileSize(video.compresedSize)
+                            : "Processing…"}
+                        </div>
+
+
+
+                    
                     </div>
                 </div>
                 <div className='flex justify-between items-center mt-4'>
-                    <div className='text-sm font-semibold'>Compression:{""}
+                    {/* <div className='text-sm font-semibold'>Compression:{""}
                         <span className='text-accent'>{compressionPercentage}%</span>
+                    </div> */}
+
+
+
+
+
+                    <div className="text-sm font-semibold">
+                    Compression:
+                    <span className="text-accent">
+                        {compressionPercentage !== null ? `${compressionPercentage}%` : " Processing…"}
+                    </span>
                     </div>
+
+
                     <button 
                     className='btn btn-primary btn-sm'
                     onClick={()=>
